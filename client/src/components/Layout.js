@@ -15,6 +15,7 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Button,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
@@ -32,6 +33,7 @@ import {
   Feedback,
   Dashboard,
   Logout,
+  Settings,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -143,7 +145,40 @@ const Layout = () => {
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <NotificationCenter />
-            <Typography variant="body2">
+            {(user?.role === 'admin' || user?.role === 'host') && (
+              <Button
+                variant="contained"
+                startIcon={<Settings />}
+                onClick={() => navigate('/manage-property-info')}
+                sx={{ 
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  fontWeight: 600,
+                  '&:hover': {
+                    bgcolor: 'grey.100',
+                  },
+                  display: { xs: 'none', sm: 'flex' }
+                }}
+              >
+                Manage Property Info
+              </Button>
+            )}
+            {(user?.role === 'admin' || user?.role === 'host') && (
+              <IconButton
+                onClick={() => navigate('/manage-property-info')}
+                sx={{ 
+                  display: { xs: 'flex', sm: 'none' },
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  '&:hover': {
+                    bgcolor: 'grey.100',
+                  }
+                }}
+              >
+                <Settings />
+              </IconButton>
+            )}
+            <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
               {user?.first_name} {user?.last_name}
             </Typography>
             <IconButton onClick={handleMenuClick} size="small">
@@ -159,6 +194,19 @@ const Layout = () => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
+        {(user?.role === 'admin' || user?.role === 'host') && (
+          <MenuItem
+            onClick={() => {
+              navigate('/manage-property-info');
+              handleMenuClose();
+            }}
+          >
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            Manage Property Info
+          </MenuItem>
+        )}
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />

@@ -27,15 +27,27 @@ import {
   AttachMoney,
   ShoppingCart,
   Download,
+  People,
 } from '@mui/icons-material';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { useAuth } from '../contexts/AuthContext';
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [orders, setOrders] = useState([]);
   const [commissions, setCommissions] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [userStatistics, setUserStatistics] = useState({
+    total: 0,
+    admin: 0,
+    host: 0,
+    guest: 0,
+    partner: 0
+  });
+  const [userRoleFilter, setUserRoleFilter] = useState('all');
   const [filters, setFilters] = useState({
     partner_id: '',
     service_type: '',
@@ -50,8 +62,10 @@ const AdminDashboard = () => {
       fetchOrders();
     } else if (tabValue === 1) {
       fetchCommissions();
+    } else if (tabValue === 2 && user?.role === 'admin') {
+      fetchUsers();
     }
-  }, [tabValue, filters]);
+  }, [tabValue, filters, userRoleFilter]);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -80,6 +94,42 @@ const AdminDashboard = () => {
       setCommissions(response.data);
     } catch (error) {
       toast.error('Failed to load commission data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (userRoleFilter && userRoleFilter !== 'all') {
+        params.append('role', userRoleFilter);
+      }
+      const response = await axios.get(`/admin/users?${params.toString()}`);
+      
+      // Handle both new format (with statistics) and old format (array only)
+      if (response.data.users) {
+        setUsers(response.data.users);
+        if (response.data.statistics) {
+          setUserStatistics(response.data.statistics);
+        }
+      } else if (Array.isArray(response.data)) {
+        // Old format - just an array of users
+        setUsers(response.data);
+        // Calculate statistics from the users array
+        const stats = {
+          total: response.data.length,
+          admin: response.data.filter(u => u.role === 'admin').length,
+          host: response.data.filter(u => u.role === 'host').length,
+          guest: response.data.filter(u => u.role === 'guest').length,
+          partner: response.data.filter(u => u.role === 'partner').length
+        };
+        setUserStatistics(stats);
+      }
+    } catch (error) {
+      toast.error('Failed to load users');
+      console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
     }
@@ -139,6 +189,7 @@ const AdminDashboard = () => {
       <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
         <Tab label="Orders" />
         <Tab label="Commissions" />
+        {user?.role === 'admin' && <Tab label="Users" />}
       </Tabs>
 
       <Card sx={{ mb: 3 }}>
@@ -344,6 +395,161 @@ const AdminDashboard = () => {
                           <TableCell>{parseFloat(row.avg_commission_percentage || 0).toFixed(2)}%</TableCell>
                         </TableRow>
                       ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      )}
+
+      {tabValue === 2 && user?.role === 'admin' && (
+        <Grid container spacing={3}>
+          {/* Statistics Cards */}
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <People sx={{ fontSize: 48, color: 'primary.main' }} />
+                  <Box>
+                    <Typography variant="h4" fontWeight={600}>
+                      {userStatistics.total || 0}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Total Users
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <People sx={{ fontSize: 48, color: 'error.main' }} />
+                  <Box>
+                    <Typography variant="h4" fontWeight={600}>
+                      {userStatistics.admin || 0}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Admins
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <People sx={{ fontSize: 48, color: 'warning.main' }} />
+                  <Box>
+                    <Typography variant="h4" fontWeight={600}>
+                      {userStatistics.host || 0}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Hosts
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <People sx={{ fontSize: 48, color: 'info.main' }} />
+                  <Box>
+                    <Typography variant="h4" fontWeight={600}>
+                      {(userStatistics.guest || 0) + (userStatistics.partner || 0)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Guests & Partners
+                    </Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Users Table */}
+          <Grid item xs={12}>
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">
+                    Users ({users.length})
+                  </Typography>
+                  <FormControl sx={{ minWidth: 200 }}>
+                    <InputLabel>Filter by Role</InputLabel>
+                    <Select
+                      value={userRoleFilter}
+                      onChange={(e) => setUserRoleFilter(e.target.value)}
+                      label="Filter by Role"
+                    >
+                      <MenuItem value="all">All Roles</MenuItem>
+                      <MenuItem value="admin">Admin</MenuItem>
+                      <MenuItem value="host">Host</MenuItem>
+                      <MenuItem value="guest">Guest</MenuItem>
+                      <MenuItem value="partner">Partner</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Email</TableCell>
+                        <TableCell>Phone</TableCell>
+                        <TableCell>Role</TableCell>
+                        <TableCell>Created At</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {users.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} align="center">
+                            <Typography variant="body2" color="text.secondary">
+                              No users found
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        users.map((userItem) => (
+                          <TableRow key={userItem.id}>
+                            <TableCell>{userItem.id}</TableCell>
+                            <TableCell>
+                              {userItem.first_name} {userItem.last_name}
+                            </TableCell>
+                            <TableCell>{userItem.email}</TableCell>
+                            <TableCell>{userItem.phone || '-'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={userItem.role}
+                                size="small"
+                                color={
+                                  userItem.role === 'admin'
+                                    ? 'error'
+                                    : userItem.role === 'host'
+                                    ? 'warning'
+                                    : userItem.role === 'partner'
+                                    ? 'info'
+                                    : 'default'
+                                }
+                              />
+                            </TableCell>
+                            <TableCell>
+                              {format(new Date(userItem.created_at), 'MMM d, yyyy')}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </TableContainer>

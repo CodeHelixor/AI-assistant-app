@@ -223,6 +223,71 @@ router.get('/orders/export', async (req, res) => {
   }
 });
 
+// Get all users (admin only)
+router.get('/users', authorizeRoles('admin'), async (req, res) => {
+  try {
+    const { role } = req.query;
+
+    let query = `
+      SELECT 
+        id,
+        email,
+        first_name,
+        last_name,
+        phone,
+        role,
+        created_at
+      FROM users
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (role && role !== 'all') {
+      query += ' AND role = ?';
+      params.push(role);
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const [users] = await pool.execute(query, params);
+
+    // Get statistics for all roles (always from full database, not filtered)
+    const [stats] = await pool.execute(`
+      SELECT 
+        role,
+        COUNT(*) as count
+      FROM users
+      GROUP BY role
+    `);
+
+    // Get total count
+    const [totalCount] = await pool.execute('SELECT COUNT(*) as total FROM users');
+    const total = totalCount[0]?.total || 0;
+
+    const statistics = {
+      total: total,
+      admin: 0,
+      host: 0,
+      guest: 0,
+      partner: 0
+    };
+
+    stats.forEach(stat => {
+      if (stat.role in statistics) {
+        statistics[stat.role] = stat.count;
+      }
+    });
+
+    res.json({
+      users,
+      statistics
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
 
 

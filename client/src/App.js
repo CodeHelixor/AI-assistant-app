@@ -8,6 +8,7 @@ import AIAssistant from './pages/AIAssistant';
 import Services from './pages/Services';
 import ServiceRequest from './pages/ServiceRequest';
 import PropertyInfo from './pages/PropertyInfo';
+import ManagePropertyInfo from './pages/ManagePropertyInfo';
 import MapView from './pages/MapView';
 import Chat from './pages/Chat';
 import TripPlanner from './pages/TripPlanner';
@@ -36,6 +37,9 @@ function App() {
             <Route path="services" element={<Services />} />
             <Route path="services/:type" element={<ServiceRequest />} />
             <Route path="property-info" element={<PropertyInfo />} />
+            {(user.role === 'admin' || user.role === 'host') && (
+              <Route path="manage-property-info" element={<ManagePropertyInfo />} />
+            )}
             <Route path="map" element={<MapView />} />
             <Route path="chat" element={<Chat />} />
             <Route path="trip-planner" element={<TripPlanner />} />

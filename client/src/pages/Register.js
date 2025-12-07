@@ -8,6 +8,11 @@ import {
   Typography,
   Box,
   Alert,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -19,6 +24,7 @@ const Register = () => {
     first_name: '',
     last_name: '',
     phone: '',
+    role: 'guest',
   });
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -112,6 +118,20 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
             />
+            <FormControl fullWidth margin="normal" required>
+              <InputLabel>Role</InputLabel>
+              <Select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                label="Role"
+              >
+                <MenuItem value="guest">Guest</MenuItem>
+                <MenuItem value="host">Host</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+              <FormHelperText>Select your account type</FormHelperText>
+            </FormControl>
             <TextField
               fullWidth
               label="Password"
