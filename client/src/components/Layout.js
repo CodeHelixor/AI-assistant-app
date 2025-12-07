@@ -71,10 +71,8 @@ const Layout = () => {
   };
 
   const handleLogout = () => {
-    if (user) {
-      logout();
-    }
-    navigate('/');
+    logout();
+    navigate('/login');
     handleMenuClose();
   };
 
@@ -102,21 +100,22 @@ const Layout = () => {
             </ListItemButton>
           </ListItem>
         ))}
-        {/* Admin dashboard accessible without authentication when sign in is blocked */}
-        <ListItem disablePadding>
-          <ListItemButton
-            selected={location.pathname === '/admin'}
-            onClick={() => {
-              navigate('/admin');
-              if (isMobile) setMobileOpen(false);
-            }}
-          >
-            <ListItemIcon sx={{ color: location.pathname === '/admin' ? 'primary.main' : 'inherit' }}>
-              <Dashboard />
-            </ListItemIcon>
-            <ListItemText primary="Admin Dashboard" />
-          </ListItemButton>
-        </ListItem>
+        {(user?.role === 'admin' || user?.role === 'host') && (
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={location.pathname === '/admin'}
+              onClick={() => {
+                navigate('/admin');
+                if (isMobile) setMobileOpen(false);
+              }}
+            >
+              <ListItemIcon sx={{ color: location.pathname === '/admin' ? 'primary.main' : 'inherit' }}>
+                <Dashboard />
+              </ListItemIcon>
+              <ListItemText primary="Admin Dashboard" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -145,11 +144,11 @@ const Layout = () => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <NotificationCenter />
             <Typography variant="body2">
-              {user ? `${user.first_name} ${user.last_name}` : 'Guest'}
+              {user?.first_name} {user?.last_name}
             </Typography>
             <IconButton onClick={handleMenuClick} size="small">
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-                {user?.first_name?.[0]?.toUpperCase() || 'G'}
+                {user?.first_name?.[0]?.toUpperCase()}
               </Avatar>
             </IconButton>
           </Box>

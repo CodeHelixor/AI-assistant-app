@@ -48,10 +48,6 @@ const Login = () => {
             Sign in to your account
           </Typography>
 
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Sign in is currently disabled. You can access all pages without signing in.
-          </Alert>
-
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -68,7 +64,6 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="email"
-              disabled
             />
             <TextField
               fullWidth
@@ -79,16 +74,14 @@ const Login = () => {
               margin="normal"
               required
               autoComplete="current-password"
-              disabled
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              disabled
               sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
-              Sign In (Disabled)
+              Sign In
             </Button>
             <Typography variant="body2" align="center">
               Don't have an account?{' '}

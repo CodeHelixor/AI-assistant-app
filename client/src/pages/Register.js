@@ -69,10 +69,6 @@ const Register = () => {
             Sign up to get started
           </Typography>
 
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            Sign up is currently disabled. You can access all pages without signing up.
-          </Alert>
-
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -88,7 +84,6 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
               required
-              disabled
             />
             <TextField
               fullWidth
@@ -98,7 +93,6 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
               required
-              disabled
             />
             <TextField
               fullWidth
@@ -109,7 +103,6 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
               required
-              disabled
             />
             <TextField
               fullWidth
@@ -118,7 +111,6 @@ const Register = () => {
               value={formData.phone}
               onChange={handleChange}
               margin="normal"
-              disabled
             />
             <TextField
               fullWidth
@@ -129,7 +121,6 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
               required
-              disabled
             />
             <TextField
               fullWidth
@@ -140,16 +131,14 @@ const Register = () => {
               onChange={handleChange}
               margin="normal"
               required
-              disabled
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              disabled
               sx={{ mt: 3, mb: 2, py: 1.5 }}
             >
-              Sign Up (Disabled)
+              Sign Up
             </Button>
             <Typography variant="body2" align="center">
               Already have an account?{' '}

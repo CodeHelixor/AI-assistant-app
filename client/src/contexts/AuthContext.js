@@ -44,12 +44,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    // Sign in is currently blocked
-    toast.error('Sign in is currently disabled');
-    return { success: false, error: 'Sign in is currently disabled' };
-    
-    // Original code kept but commented out for future use
-    /*
     try {
       const response = await axios.post('/auth/login', { email, password });
       const { token, user } = response.data;
@@ -63,16 +57,9 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-    */
   };
 
   const register = async (userData) => {
-    // Sign up is currently blocked
-    toast.error('Sign up is currently disabled');
-    return { success: false, error: 'Sign up is currently disabled' };
-    
-    // Original code kept but commented out for future use
-    /*
     try {
       const response = await axios.post('/auth/register', userData);
       const { token, user } = response.data;
@@ -86,7 +73,6 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
-    */
   };
 
   const logout = () => {

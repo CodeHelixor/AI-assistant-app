@@ -25,25 +25,30 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={!user ? <Login /> : <Navigate to="/" />} />
+      <Route path="/register" element={!user ? <Register /> : <Navigate to="/" />} />
       
-      {/* All routes accessible without authentication - sign in/sign up is blocked */}
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="ai-assistant" element={<AIAssistant />} />
-        <Route path="services" element={<Services />} />
-        <Route path="services/:type" element={<ServiceRequest />} />
-        <Route path="property-info" element={<PropertyInfo />} />
-        <Route path="map" element={<MapView />} />
-        <Route path="chat" element={<Chat />} />
-        <Route path="trip-planner" element={<TripPlanner />} />
-        <Route path="issues" element={<Issues />} />
-        <Route path="feedback" element={<Feedback />} />
-        <Route path="admin" element={<AdminDashboard />} />
-      </Route>
+      {user && (
+        <>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="ai-assistant" element={<AIAssistant />} />
+            <Route path="services" element={<Services />} />
+            <Route path="services/:type" element={<ServiceRequest />} />
+            <Route path="property-info" element={<PropertyInfo />} />
+            <Route path="map" element={<MapView />} />
+            <Route path="chat" element={<Chat />} />
+            <Route path="trip-planner" element={<TripPlanner />} />
+            <Route path="issues" element={<Issues />} />
+            <Route path="feedback" element={<Feedback />} />
+            {(user.role === 'admin' || user.role === 'host') && (
+              <Route path="admin" element={<AdminDashboard />} />
+            )}
+          </Route>
+        </>
+      )}
       
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
     </Routes>
   );
 }
