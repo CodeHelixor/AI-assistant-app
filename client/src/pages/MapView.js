@@ -11,8 +11,6 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import Map, { Marker, Popup } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -31,26 +29,11 @@ const MapView = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [property, setProperty] = useState(null);
   const [filterType, setFilterType] = useState('all');
-  const [viewState, setViewState] = useState({
-    longitude: 0,
-    latitude: 0,
-    zoom: 12,
-  });
   const propertyId = 1; // Should come from context
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (property?.latitude && property?.longitude) {
-      setViewState({
-        longitude: parseFloat(property.longitude),
-        latitude: parseFloat(property.latitude),
-        zoom: 12,
-      });
-    }
-  }, [property]);
 
   const fetchData = async () => {
     try {
@@ -79,6 +62,24 @@ const MapView = () => {
       historical_site: '#9c27b0',
     };
     return colors[type] || '#757575';
+  };
+
+  // Generate Google Maps embed URL based on property location
+  const getGoogleMapsUrl = () => {
+    if (!property) return null;
+    
+    // Prefer coordinates if available (more accurate)
+    if (property.latitude && property.longitude) {
+      return `https://www.google.com/maps?q=${property.latitude},${property.longitude}&output=embed`;
+    }
+    
+    // Fall back to address if coordinates not available
+    if (property.address) {
+      const encodedAddress = encodeURIComponent(property.address);
+      return `https://www.google.com/maps?q=${encodedAddress}&output=embed`;
+    }
+    
+    return null;
   };
 
   return (
@@ -131,63 +132,33 @@ const MapView = () => {
         </Card>
 
         <Box sx={{ flex: 1 }}>
-          {process.env.REACT_APP_MAPBOX_TOKEN ? (
-            <Map
-              {...viewState}
-              onMove={evt => setViewState(evt.viewState)}
-              mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
-              style={{ width: '100%', height: '100%' }}
-              mapStyle="mapbox://styles/mapbox/streets-v11"
+          {getGoogleMapsUrl() ? (
+            <Box 
+              sx={{ 
+                height: '100%',
+                borderRadius: 2,
+                overflow: 'hidden',
+                boxShadow: 3,
+                border: 1,
+                borderColor: 'divider'
+              }}
             >
-              {property && (
-                <Marker
-                  longitude={parseFloat(property.longitude)}
-                  latitude={parseFloat(property.latitude)}
-                  color="#1976d2"
-                />
-              )}
-              {filteredLocations.map((location) => (
-                <Marker
-                  key={location.id}
-                  longitude={parseFloat(location.longitude)}
-                  latitude={parseFloat(location.latitude)}
-                  color={getLocationColor(location.type)}
-                  onClick={() => setSelectedLocation(location)}
-                />
-              ))}
-              {selectedLocation && (
-                <Popup
-                  longitude={parseFloat(selectedLocation.longitude)}
-                  latitude={parseFloat(selectedLocation.latitude)}
-                  anchor="bottom"
-                  onClose={() => setSelectedLocation(null)}
-                >
-                  <Box sx={{ p: 1 }}>
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      {selectedLocation.name}
-                    </Typography>
-                    <Chip
-                      label={selectedLocation.type}
-                      size="small"
-                      sx={{ bgcolor: getLocationColor(selectedLocation.type), color: 'white', my: 1 }}
-                    />
-                    {selectedLocation.description && (
-                      <Typography variant="body2">{selectedLocation.description}</Typography>
-                    )}
-                    {selectedLocation.address && (
-                      <Typography variant="caption" color="text.secondary">
-                        📍 {selectedLocation.address}
-                      </Typography>
-                    )}
-                  </Box>
-                </Popup>
-              )}
-            </Map>
+              <iframe
+                src={getGoogleMapsUrl()}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={`${property?.name || 'Property'} Location`}
+              />
+            </Box>
           ) : (
             <Card sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <CardContent>
                 <Typography color="text.secondary">
-                  Mapbox token not configured. Please set REACT_APP_MAPBOX_TOKEN in your environment.
+                  {property ? 'No location information available for this property.' : 'Loading property information...'}
                 </Typography>
               </CardContent>
             </Card>
