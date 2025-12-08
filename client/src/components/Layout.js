@@ -31,6 +31,7 @@ import {
   Route,
   ReportProblem,
   Feedback,
+  ContactEmergency,
   Dashboard,
   Logout,
   Settings,
@@ -49,6 +50,7 @@ const menuItems = [
   { text: 'Trip Planner', icon: <Route />, path: '/trip-planner' },
   { text: 'Report Issue', icon: <ReportProblem />, path: '/issues' },
   { text: 'Feedback', icon: <Feedback />, path: '/feedback' },
+  { text: 'Emergency Contacts', icon: <ContactEmergency />, path: '/emergency-contacts' },
 ];
 
 const Layout = () => {

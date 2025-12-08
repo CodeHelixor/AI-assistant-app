@@ -14,6 +14,7 @@ import Chat from './pages/Chat';
 import TripPlanner from './pages/TripPlanner';
 import Issues from './pages/Issues';
 import Feedback from './pages/Feedback';
+import EmergencyContacts from './pages/EmergencyContacts';
 import AdminDashboard from './pages/AdminDashboard';
 import Layout from './components/Layout';
 
@@ -45,6 +46,7 @@ function App() {
             <Route path="trip-planner" element={<TripPlanner />} />
             <Route path="issues" element={<Issues />} />
             <Route path="feedback" element={<Feedback />} />
+            <Route path="emergency-contacts" element={<EmergencyContacts />} />
             {(user.role === 'admin' || user.role === 'host') && (
               <Route path="admin" element={<AdminDashboard />} />
             )}
